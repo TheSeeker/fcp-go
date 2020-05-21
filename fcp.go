@@ -2,9 +2,11 @@
 package fcp
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"net"
+	"os"
 )
 
 type FCPClient struct {
@@ -13,6 +15,7 @@ type FCPClient struct {
 	identifier string
 	socket     *net.TCPConn
 	msgSender  chan message
+	msgHandler chan message
 }
 
 type message struct {
@@ -24,7 +27,8 @@ type message struct {
 func NewClient(ipPort string, ssl bool, id string) (FCPClient, error) {
 	addr, err := net.ResolveTCPAddr("tcp", ipPort)
 	msgSender := make(chan message, 20)
-	return FCPClient{addr, ssl, id, nil, msgSender}, err
+	msgHandler := make(chan message, 20)
+	return FCPClient{addr, ssl, id, nil, msgSender, msgHandler}, err
 }
 
 func (r *FCPClient) sender() {
@@ -54,12 +58,88 @@ func (r *FCPClient) sender() {
 	}
 }
 
-func (r *FCPClient) reciever() {
-	buf := make([]byte, 1200)
+func (r *FCPClient) handler() {
 	for {
-		rbytes, _ := r.socket.Read(buf)
+		msg := <-r.msgHandler
+
+		switch msg.message {
+		case "NodeHello":
+		case "CloseConnectionDuplicateClientName":
+		case "Peer":
+		case "PeerNote":
+		case "EndListPeers":
+		case "EndListPeerNotes":
+		case "PeerRemoved":
+		case "NodeData":
+		case "ConfigData": // (since 1027)
+		case "TestDDAReply": // (since 1027)
+		case "TestDDAComplete": // (since 1027)
+		case "SSKKeyPair":
+		case "PersistentGet":
+		case "PersistentPut":
+		case "PersistentPutDir":
+		case "URIGenerated":
+		case "PutSuccessful":
+		case "PutFetchable":
+		case "DataFound":
+		case "GetRequestStatus":
+		case "AllData":
+		case "StartedCompression":
+		case "FinishedCompression":
+		case "SimpleProgress":
+		case "ExpectedHashes": // (since 1254)
+		case "ExpectedMIME": // (since 1307)
+		case "ExpectedDataLength": // (since 1307)
+		case "CompatibilityMode": // (since 1254)
+		case "EndListPersistentRequests":
+		case "PersistentRequestRemoved": // (since 1016)
+		case "PersistentRequestModified": // (since 1016)
+		case "SendingToNetwork": // (since 1207)
+		case "EnterFiniteCooldown": // (since 1365)
+		case "GeneratedMetadata": // (since 1380)
+
+		case "PutFailed":
+		case "GetFailed":
+		case "ProtocolError":
+		case "IdentifierCollision":
+		case "UnknownNodeIdentifier":
+		case "UnknownPeerNoteType":
+		case "SubscribedUSK":
+		case "SubscribedUSKUpdate":
+		case "SubscribedUSKSendingToNetwork": //(since 1365)
+		case "SubscribedUSKRoundFinished": // (since 1365)
+
+		case "PluginInfo": // (since 1075)
+		case "PluginRemoved": // (since 1227)
+		case "FCPPluginReply": // (since 1075)
+
+		case "ProbeBandwidth":
+		case "ProbeBuild":
+		case "ProbeError":
+		case "ProbeIdentifier":
+		case "ProbeLinkLengths":
+		case "ProbeLocation":
+		case "ProbeRefused":
+		case "ProbeRejectStats":
+		case "ProbeStoreSize":
+		case "ProbeUptime":
+		default:
+			//Unknown Message
+		}
+	}
+}
+
+func (r *FCPClient) reciever() {
+	scanner := bufio.NewScanner(r.socket)
+	for {
+		if ok := scanner.Scan(); !ok {
+			break
+		}
+
 		//do stuff with this data, like compose messages out of it and notify
 		//the client via channels or something...
-		fmt.Print(string(buf[:rbytes]))
+		fmt.Println(scanner.Text())
 	}
+	fmt.Println("Connection Closed")
+	os.Exit(1)
 }
