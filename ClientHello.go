@@ -33,7 +33,7 @@ func (r *FCPClient) Connect() error {
 
 	go r.sender()
 	go r.reciever()
-	go r.handler()
+	go r.handler(r.caller)
 
 	hello := r.newClientHello()
 	hello.setName(r.identifier)

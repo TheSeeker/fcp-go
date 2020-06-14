@@ -5,8 +5,11 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type FCPClient struct {
@@ -16,20 +19,25 @@ type FCPClient struct {
 	socket     *net.TCPConn
 	msgSender  chan message
 	msgHandler chan message
-	caller     chan clientMessage
+	caller     chan nodeMessager
 }
 
 type message struct {
 	name   string
 	params []string
-	data   *[]byte
+	data   []byte
+}
+
+type nodeMessager interface {
+	parseMessage([]string)
 }
 
 func NewClient(ipPort string, ssl bool, id string) (FCPClient, error) {
 	addr, err := net.ResolveTCPAddr("tcp", ipPort)
 	msgSender := make(chan message, 20)
 	msgHandler := make(chan message, 20)
-	return FCPClient{addr, ssl, id, nil, msgSender, msgHandler}, err
+	caller := make(chan nodeMessager, 20)
+	return FCPClient{addr, ssl, id, nil, msgSender, msgHandler, caller}, err
 }
 
 func (r *FCPClient) sender() {
@@ -54,135 +62,139 @@ func (r *FCPClient) sender() {
 			fmt.Println("EndMessage") //crappy debug output is crappy
 		} else {
 			r.socket.Write([]byte("Data\n"))
-			r.socket.Write(*msg.data)
+			r.socket.Write(msg.data)
 		}
 	}
 }
 
-func (r *FCPClient) handler(caller chan message) {
+func (r *FCPClient) handler(caller chan nodeMessager) {
 	for {
 		msg := <-r.msgHandler
 
 		switch msg.name {
 		case "NodeHello":
-			caller <- nodeHello.parseMessage(params)
+			nh := &NodeHello{}
+			nh.parseMessage(msg.params)
+			caller <- nh
 		case "CloseConnectionDuplicateClientName":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "Peer":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PeerNote":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "EndListPeers":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "EndListPeerNotes":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PeerRemoved":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "NodeData":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ConfigData": // (since 1027)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "TestDDAReply": // (since 1027)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "TestDDAComplete": // (since 1027)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "SSKKeyPair":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PersistentGet":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PersistentPut":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PersistentPutDir":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "URIGenerated":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PutSuccessful":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PutFetchable":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "DataFound":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "GetRequestStatus":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "AllData":
-			fmt.Println("Unimplemented")
+			ad := &AllData{}
+			ad.parseMessage(msg.params)
+			ad.SetData(msg.data)
+			caller <- ad
 		case "StartedCompression":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "FinishedCompression":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "SimpleProgress":
-			fmt.Println("Unimplemented")
+			sp := &SimpleProgress{}
+			sp.parseMessage(msg.params)
+			caller <- sp
 		case "ExpectedHashes": // (since 1254)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ExpectedMIME": // (since 1307)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ExpectedDataLength": // (since 1307)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "CompatibilityMode": // (since 1254)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "EndListPersistentRequests":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PersistentRequestRemoved": // (since 1016)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PersistentRequestModified": // (since 1016)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "SendingToNetwork": // (since 1207)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "EnterFiniteCooldown": // (since 1365)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "GeneratedMetadata": // (since 1380)
-			fmt.Println("Unimplemented")
-
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PutFailed":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "GetFailed":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProtocolError":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "IdentifierCollision":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "UnknownNodeIdentifier":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "UnknownPeerNoteType":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "SubscribedUSK":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "SubscribedUSKUpdate":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "SubscribedUSKSendingToNetwork": //(since 1365)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "SubscribedUSKRoundFinished": // (since 1365)
-			fmt.Println("Unimplemented")
-
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PluginInfo": // (since 1075)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "PluginRemoved": // (since 1227)
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "FCPPluginReply": // (since 1075)
-			fmt.Println("Unimplemented")
-
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeBandwidth":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeBuild":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeError":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeIdentifier":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeLinkLengths":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeLocation":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeRefused":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeRejectStats":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeStoreSize":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		case "ProbeUptime":
-			fmt.Println("Unimplemented")
+			fmt.Println("Unimplemented message:", msg.name)
 		default:
-			fmt.Println("Unknown Node Message " + msg.name + " | " + msg.params)
+			fmt.Println("Unknown Node Message " + msg.name + " | " + fmt.Sprint(msg.params))
 			//Unknown Message
 		}
 	}
@@ -190,15 +202,78 @@ func (r *FCPClient) handler(caller chan message) {
 
 func (r *FCPClient) reciever() {
 	scanner := bufio.NewScanner(r.socket)
+	started := false
+	msg := message{}
+	params := []string{}
+	var datalen int64 = 0
+	var data []byte = nil
+
 	for {
 		if ok := scanner.Scan(); !ok {
 			break
 		}
+		if !started {
+			msg.name = scanner.Text()
+			started = true
+			if ok := scanner.Scan(); !ok {
+				break
+			}
+		}
+		param, val := SplitParam(scanner.Text())
+		switch param {
+		case "EndMessage":
+			params = append(params, scanner.Text())
+			msg.params = make([]string, len(params))
+			copy(msg.params, params)
+			r.msgHandler <- msg
+			started = false
+			params = []string{""}
+			datalen = 0
+			data = nil
+		case "DataLength":
+			params = append(params, scanner.Text())
+			datalen, _ = strconv.ParseInt(val, 10, 64)
+		case "Data":
+			params = append(params, scanner.Text())
+			data = make([]byte, datalen)
+			rb, err := io.ReadFull(r.socket, data)
+			if int64(rb) < datalen {
+				fmt.Println("Was expecting", datalen, "bytes, got", rb, "Bytes instead. ", err)
+			}
+			msg.data = make([]byte, datalen)
+			copy(msg.data, data)
 
-		//do stuff with this data, like compose messages out of it and notify
-		//the client via channels or something...
-		fmt.Println(scanner.Text())
+			msg.params = make([]string, len(params))
+			copy(msg.params, params)
+			r.msgHandler <- msg
+			started = false
+			params = []string{""}
+			datalen = 0
+			data = nil
+
+		default:
+			params = append(params, scanner.Text())
+
+		}
+
+		fmt.Println("RAW DUMP:", scanner.Text())
 	}
 	fmt.Println("Connection Closed")
 	os.Exit(1)
+}
+
+func (r *FCPClient) Caller() chan nodeMessager {
+	return r.caller
+}
+
+func SplitParam(v string) (param string, val string) {
+	val = ""
+	param = ""
+	split := strings.SplitAfterN(v, "=", 2)
+	param = split[0]
+	if strings.HasSuffix(param, "=") {
+		param = strings.TrimSuffix(param, "=")
+		val = split[1]
+	}
+	return
 }

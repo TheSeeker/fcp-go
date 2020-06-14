@@ -31,7 +31,7 @@ type clientPut struct {
 	overrideSplitfileCryptoKey       string
 	realTimeFlag                     bool
 	metadataThreshold                int64
-	data                             *[]byte
+	data                             []byte
 }
 
 func (r *FCPClient) NewClientPut() clientPut {
@@ -51,7 +51,7 @@ func (r *FCPClient) NewClientPut() clientPut {
 		"",
 		false,
 		-1,
-		&[]byte{},
+		[]byte{},
 	}
 }
 
@@ -192,9 +192,9 @@ func (r *clientPut) SetMetadataThreshold(v int64) error {
 	r.metadataThreshold = v
 	return nil
 }
-func (r *clientPut) SetData(v *[]byte) error {
+func (r *clientPut) SetData(v []byte) error {
 	//FIXME add sanity checking.
-	r.data = v
+	copy(r.data, v)
 	return nil
 }
 

@@ -241,7 +241,7 @@ func (r *clientGet) getMessage() message {
 		nil}
 }
 
-func (r *FCPClient) DoFetch(v clientGet) error {
+func (r FCPClient) DoFetch(v clientGet) error {
 	r.msgSender <- v.getMessage()
 	return nil
 }
