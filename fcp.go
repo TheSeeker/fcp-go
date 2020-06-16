@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type FCPClient struct {
@@ -43,6 +44,7 @@ func NewClient(ipPort string, ssl bool, id string) (FCPClient, error) {
 func (r *FCPClient) sender() {
 	for {
 		msg := <-r.msgSender
+		fmt.Println(len(msg.data), "bytes of data after message sender receipt.")
 		if r.socket == nil {
 			err := errors.New("Trying to send a message while socket is closed.")
 			fmt.Println(err.Error())
@@ -61,8 +63,15 @@ func (r *FCPClient) sender() {
 			r.socket.Write([]byte("EndMessage\n"))
 			fmt.Println("EndMessage") //crappy debug output is crappy
 		} else {
+			fmt.Println("Data -", len(msg.data), "bytes")
 			r.socket.Write([]byte("Data\n"))
-			r.socket.Write(msg.data)
+			t1 := time.Now()
+			written, err := r.socket.Write(msg.data)
+			if err == nil {
+				fmt.Println(written, "bytes written in", time.Since(t1).Seconds(), "seconds")
+			} else {
+				fmt.Println(err.Error())
+			}
 		}
 	}
 }

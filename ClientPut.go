@@ -1,6 +1,9 @@
 package fcp
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 type clientPut struct {
 	uRI                              string
@@ -194,6 +197,7 @@ func (r *clientPut) SetMetadataThreshold(v int64) error {
 }
 func (r *clientPut) SetData(v []byte) error {
 	//FIXME add sanity checking.
+	r.data = make([]byte, len(v))
 	copy(r.data, v)
 	return nil
 }
@@ -205,7 +209,11 @@ func (r *clientPut) getMessage() message {
 		params = append(params, "URI="+r.uRI)
 	}
 	if r.contentType != "" {
-		params = append(params, "ContentType="+r.contentType)
+		if r.contentType != " " { // use a single space as content type to output an empty content type string for zero metadata inserts.
+			params = append(params, "ContentType=")
+		} else {
+			params = append(params, "ContentType="+r.contentType)
+		}
 	}
 	if r.identifier != "" {
 		params = append(params, "Identifier="+r.identifier)
@@ -242,7 +250,11 @@ func (r *clientPut) getMessage() message {
 		params = append(params, "Persistence="+r.persistence)
 	}
 	if r.targetFilename != "" {
-		params = append(params, "TargetFilename="+r.targetFilename)
+		if r.targetFilename == " " { // use a single space as content type to output an empty content type string for zero metadata inserts
+			params = append(params, "TargetFilename=")
+		} else {
+			params = append(params, "TargetFilename="+r.targetFilename)
+		}
 	}
 	if r.earlyEncode {
 		params = append(params, "EarlyEncode=true")
@@ -251,7 +263,7 @@ func (r *clientPut) getMessage() message {
 		params = append(params, "UploadFrom="+r.uploadFrom)
 	}
 	if r.uploadFrom == "direct" {
-		params = append(params, "DataLength="+string(r.dataLength))
+		params = append(params, "DataLength="+strconv.FormatUint(r.dataLength, 10))
 	}
 	if r.uploadFrom == "disk" {
 		params = append(params, "Filename="+r.filename)
@@ -272,7 +284,7 @@ func (r *clientPut) getMessage() message {
 		params = append(params, "ExtraInsertsSingleBlock="+strconv.FormatUint(r.extraInsertsSingleBlock, 10))
 	}
 	if r.extraInsertsSplitfileHeaderBlock != 2 {
-		params = append(params, "ExtraInsertsSplitfileHeaderBlock="+string(r.extraInsertsSplitfileHeaderBlock))
+		params = append(params, "ExtraInsertsSplitfileHeaderBlock="+strconv.FormatUint(r.extraInsertsSplitfileHeaderBlock, 10))
 	}
 	if r.compatibilityMode != "COMPAT_CURRENT" {
 		params = append(params, "CompatibilityMode="+r.compatibilityMode)
@@ -290,6 +302,7 @@ func (r *clientPut) getMessage() message {
 		params = append(params, "MetadataThreshold="+strconv.FormatInt(r.metadataThreshold, 10))
 	}
 
+	fmt.Println(len(r.data), "bytes of data before message return.")
 	return message{"ClientPut",
 		params,
 		r.data}
