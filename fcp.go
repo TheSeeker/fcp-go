@@ -114,9 +114,13 @@ func (r *FCPClient) handler(caller chan nodeMessager) {
 		case "PersistentPutDir":
 			fmt.Println("Unimplemented message:", msg.name)
 		case "URIGenerated":
-			fmt.Println("Unimplemented message:", msg.name)
+			ug := &URIGenerated{}
+			ug.parseMessage(msg.params)
+			caller <- ug
 		case "PutSuccessful":
-			fmt.Println("Unimplemented message:", msg.name)
+			ps := &PutSuccessful{}
+			ps.parseMessage(msg.params)
+			caller <- ps
 		case "PutFetchable":
 			fmt.Println("Unimplemented message:", msg.name)
 		case "DataFound":
@@ -137,7 +141,9 @@ func (r *FCPClient) handler(caller chan nodeMessager) {
 			sp.parseMessage(msg.params)
 			caller <- sp
 		case "ExpectedHashes": // (since 1254)
-			fmt.Println("Unimplemented message:", msg.name)
+			eh := &ExpectedHashes{}
+			eh.parseMessage(msg.params)
+			caller <- eh
 		case "ExpectedMIME": // (since 1307)
 			fmt.Println("Unimplemented message:", msg.name)
 		case "ExpectedDataLength": // (since 1307)
