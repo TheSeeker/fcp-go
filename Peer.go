@@ -99,7 +99,7 @@ type Peer struct {
 }
 
 func (r *Peer) NewMetadata() metadata {
-	return Metadata{
+	return metadata{
 		0, 0,
 		time.Unix(0, 0), time.Unix(0, 0), time.Unix(0, 0), time.Unix(0, 0),
 		"",
