@@ -1,12 +1,12 @@
 package fcp
 
-type addPeer struct { // Possible values 				Mandatory 	Description
-	trust      string // LOW, NORMAL, HIGH		 	yes 			Sets the trust you put in the new peer.
-	visibility string // NO, NAME_ONLY, YES 			yes 			Determines whether the new peer will be visible for your peers.
-	file       string // filename 					no 			If set, the peer noderef is read from the given filename relative to the node's current directory.
-	uRL        string // URL 						no		 	If set, the peer noderef is read from the given URL.
-	//<raw_noderef> 			// <key>=<value>			no 			If neither File nor URL are set, the field set is read as a noderef.
-	//nodeRef NodeRefSFS	//	                                 TODO: implement allowing a manually configured noderef?
+type addPeer struct { // Possible values      Mandatory   Description
+	trust      string // LOW, NORMAL, HIGH    yes         Sets the trust you put in the new peer.
+	visibility string // NO, NAME_ONLY, YES   yes         Determines whether the new peer will be visible for your peers.
+	file       string // filename             no          If set, the peer noderef is read from the given filename relative to the node's current directory.
+	uRL        string // URL                  no          If set, the peer noderef is read from the given URL.
+	//<raw_noderef>    // <key>=<value>        no          If neither File nor URL are set, the field set is read as a noderef.
+	//nodeRef NodeRefSFS // TODO: implement allowing a manually configured noderef?
 }
 
 func (r *FCPClient) NewAddPeer() addPeer {

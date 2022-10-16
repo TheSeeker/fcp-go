@@ -20,7 +20,7 @@ type FCPClient struct {
 	socket     *net.TCPConn
 	msgSender  chan message
 	msgHandler chan message
-	caller     chan nodeMessager
+	caller     chan NodeMessager
 }
 
 type message struct {
@@ -29,7 +29,7 @@ type message struct {
 	data   []byte   // if data is nil, EndMessage is automatically appended to the end of the params list.
 }
 
-type nodeMessager interface {
+type NodeMessager interface {
 	parseMessage([]string)
 	GetName() string
 }
@@ -38,7 +38,7 @@ func NewClient(ipPort string, ssl bool, id string) (FCPClient, error) {
 	addr, err := net.ResolveTCPAddr("tcp", ipPort)
 	msgSender := make(chan message, 20)
 	msgHandler := make(chan message, 20)
-	caller := make(chan nodeMessager, 20)
+	caller := make(chan NodeMessager, 20)
 	return FCPClient{addr, ssl, id, nil, msgSender, msgHandler, caller}, err
 }
 
@@ -141,15 +141,16 @@ func (r *FCPClient) reciever() {
 	os.Exit(1)
 }
 
-// handler(nodeMessager) listens on a message channel, creates and populates the appropriate
-// type, then hands off the message to the provided nodeMessager channel.
-func (r *FCPClient) handler(caller chan nodeMessager) {
+// handler(NodeMessager) listens on a message channel, creates and populates the appropriate
+// type, then hands off the message to the provided NodeMessager channel.
+func (r *FCPClient) handler(caller chan NodeMessager) {
 	for {
 		msg := <-r.msgHandler
 
 		// This is the list of all known FCP Server->Client messages.
 		// If I can figure out how to make reflection work, I might be able to generalize these
 		// since they all have the exact same pattern
+
 		switch msg.name {
 		case "NodeHello":
 			nh := &NodeHello{}
@@ -286,7 +287,7 @@ func (r *FCPClient) handler(caller chan nodeMessager) {
 }
 
 // Caller() returns the callback channel for this instance of fcp-go
-func (r *FCPClient) Caller() chan nodeMessager {
+func (r *FCPClient) Caller() chan NodeMessager {
 	return r.caller
 }
 
