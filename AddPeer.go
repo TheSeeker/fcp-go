@@ -10,7 +10,7 @@ type addPeer struct { // Possible values 				Mandatory 	Description
 }
 
 func (r *FCPClient) NewAddPeer() addPeer {
-	return AddPeer{
+	return addPeer{
 		"", "", "", "",
 	}
 }
