@@ -1,3 +1,3 @@
-module www.github.com/TheSeeker/fcp-go.git
+module github.com/TheSeeker/fcp-go
 
 go 1.19
