@@ -1,4 +1,4 @@
-//PutSuccessful
+// PutSuccessful
 package fcp
 
 import (
@@ -44,6 +44,7 @@ func (r *PutSuccessful) parseMessage(rawMsg []string) {
 	}
 }
 
+func (r *PutSuccessful) GetName() string              { return "PutSuccessful" }
 func (r *PutSuccessful) GetGlobal() bool              { return r.global }
 func (r *PutSuccessful) GetIdentifier() string        { return r.identifier }
 func (r *PutSuccessful) GetStartupTime() time.Time    { return r.startupTime }

@@ -70,7 +70,8 @@ func (r *NodeHello) parseMessage(rawMsg []string) {
 	}
 }
 
-//Getters
+// Getters
+func (r *NodeHello) GetName() string                 { return "NodeHello" }
 func (r *NodeHello) GetNode() string                 { return r.node }
 func (r *NodeHello) GetFCPVersion() string           { return r.fCPVersion }
 func (r *NodeHello) GetVersion() []string            { return r.version }

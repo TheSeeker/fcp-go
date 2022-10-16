@@ -16,6 +16,7 @@ type clientGet struct { //				Values					Mandatory	default		Criteria 			Descript
 	   2: SendingToNetwork messages
 	   4: CompatibilityMode messages (since 1255)
 	   8: ExpectedHashes messages (since 1255)
+	   16: Not used?
 	   32: ExpectedMIME messages (since 1307)
 	   64: ExpectedDataLength messages (since 1307)
 	*/
@@ -79,14 +80,19 @@ func (r *clientGet) SetIdentifier(v string) error {
 	return nil
 }
 
-/*Bitmask...
- 0: report when complete
- 1: SimpleProgress messages
- 2: SendingToNetwork messages
- 4: CompatibilityMode messages (since 1255)
- 8: ExpectedHashes messages (since 1255)
+/*
+Bitmask...
+
+	0: report when complete
+	1: SimpleProgress messages
+	2: SendingToNetwork messages
+	4: CompatibilityMode messages (since 1255)
+	8: ExpectedHashes messages (since 1255)
+
+16: Not used?
 32: ExpectedMIME messages (since 1307)
-64: ExpectedDataLength messages (since 1307)*/
+64: ExpectedDataLength messages (since 1307)
+*/
 func (r *clientGet) SetVerbosity(v byte) error {
 	//FIXME add sanity checking.
 	r.verbosity = v

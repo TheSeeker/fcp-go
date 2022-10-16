@@ -25,3 +25,5 @@ func (r *FCPClient) Disconnect() error {
 
 	return nil
 }
+
+func (r *disconnect) GetName() string { return "Disconnect" }

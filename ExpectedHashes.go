@@ -1,4 +1,4 @@
-//ExpectedHashes
+// ExpectedHashes
 package fcp
 
 import (
@@ -49,6 +49,7 @@ func (r *ExpectedHashes) parseMessage(rawMsg []string) {
 	}
 }
 
+func (r *ExpectedHashes) GetName() string          { return "ExpectedHashes" }
 func (r *ExpectedHashes) GetIdentifier() string    { return r.identifier }
 func (r *ExpectedHashes) GetGlobal() bool          { return r.global }
 func (r *ExpectedHashes) GetHashes_SHA512() string { return r.hashes_SHA512 }

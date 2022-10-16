@@ -46,6 +46,7 @@ func (r *AllData) parseMessage(rawMsg []string) {
 	}
 }
 
+func (r *AllData) GetName() string                 { return "AllData" }
 func (r *AllData) GetIdentifier() string           { return r.identifier }
 func (r *AllData) GetCompletionTime() time.Time    { return r.completionTime }
 func (r *AllData) GetStartupTime() time.Time       { return r.startupTime }

@@ -1,4 +1,3 @@
-// NodeHello
 package fcp
 
 import (
@@ -8,16 +7,16 @@ import (
 )
 
 /*
- SimpleProgress
- Total=12288 // 12,288 blocks we can fetch
- Required=8192 // we only need 8,192 of them (because of splitfile redundancy)
- Failed=452 // 452 of them have failed due to running out of retries
- FatallyFailed=0 // none of them have encountered fatal errors
- Succeeded=1027 // we have successfully fetched 1,027 blocks
- FinalizedTotal=true // the Total will not increase any further (if this is false, it may increase; it will never decrease)
- Identifier=Request Number One
- Global=true // true if the request is on the global queue, false otherwise
- EndMessage
+SimpleProgress
+Total=12288 // 12,288 blocks we can fetch
+Required=8192 // we only need 8,192 of them (because of splitfile redundancy)
+Failed=452 // 452 of them have failed due to running out of retries
+FatallyFailed=0 // none of them have encountered fatal errors
+Succeeded=1027 // we have successfully fetched 1,027 blocks
+FinalizedTotal=true // the Total will not increase any further (if this is false, it may increase; it will never decrease)
+Identifier=Request Number One
+Global=true // true if the request is on the global queue, false otherwise
+EndMessage
 */
 type SimpleProgress struct {
 	succeeded             uint64
@@ -70,6 +69,7 @@ func (r *SimpleProgress) parseMessage(rawMsg []string) {
 	}
 }
 
+func (r *SimpleProgress) GetName() string                  { return "SimpleProgress" }
 func (r *SimpleProgress) GetSucceeded() uint64             { return r.succeeded }
 func (r *SimpleProgress) GetIdentifier() string            { return r.identifier }
 func (r *SimpleProgress) GetRequired() uint64              { return r.required }

@@ -1,4 +1,4 @@
-//URIGenerated
+// URIGenerated
 package fcp
 
 import (
@@ -31,5 +31,6 @@ func (r *URIGenerated) parseMessage(rawMsg []string) {
 	}
 }
 
+func (r *URIGenerated) GetName() string       { return "URIGenerated" }
 func (r *URIGenerated) GetIdentifier() string { return r.identifier }
 func (r *URIGenerated) GetURI() string        { return r.uRI }

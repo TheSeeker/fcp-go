@@ -24,13 +24,14 @@ type FCPClient struct {
 }
 
 type message struct {
-	name   string
-	params []string
-	data   []byte
+	name   string   // message name
+	params []string // don't include EndMessage in your params list.
+	data   []byte   // if data is nil, EndMessage is automatically appended to the end of the params list.
 }
 
 type nodeMessager interface {
 	parseMessage([]string)
+	GetName() string
 }
 
 func NewClient(ipPort string, ssl bool, id string) (FCPClient, error) {
@@ -63,7 +64,7 @@ func (r *FCPClient) sender() {
 			r.socket.Write([]byte("EndMessage\n"))
 			fmt.Println("EndMessage") //crappy debug output is crappy
 		} else {
-			fmt.Println("Data -", len(msg.data), "bytes")
+			fmt.Println("Data: ", len(msg.data), "bytes")
 			r.socket.Write([]byte("Data\n"))
 			t1 := time.Now()
 			written, err := r.socket.Write(msg.data)
@@ -76,10 +77,79 @@ func (r *FCPClient) sender() {
 	}
 }
 
+// reciever() monitors the FCP connection for incoming messages, and hands the raw messages off
+// to the message handler.
+func (r *FCPClient) reciever() {
+	scanner := bufio.NewScanner(r.socket)
+	started := false
+	msg := message{}
+	params := []string{}
+	var datalen int64 = 0
+	var data []byte = nil
+
+	for {
+		if ok := scanner.Scan(); !ok {
+			break
+		}
+		if !started {
+			msg.name = scanner.Text()
+			started = true
+			if ok := scanner.Scan(); !ok {
+				break
+			}
+		}
+		param, val := SplitParam(scanner.Text())
+		switch param {
+		case "EndMessage":
+			params = append(params, scanner.Text())
+			msg.params = make([]string, len(params))
+			copy(msg.params, params)
+			r.msgHandler <- msg
+			started = false
+			params = []string{""}
+			datalen = 0
+			data = nil
+		case "DataLength":
+			params = append(params, scanner.Text())
+			datalen, _ = strconv.ParseInt(val, 10, 64)
+		case "Data":
+			params = append(params, scanner.Text())
+			data = make([]byte, datalen)
+			rb, err := io.ReadFull(r.socket, data)
+			if int64(rb) < datalen {
+				fmt.Println("Was expecting", datalen, "bytes, got", rb, "Bytes instead. ", err)
+			}
+			msg.data = make([]byte, datalen)
+			copy(msg.data, data)
+
+			msg.params = make([]string, len(params))
+			copy(msg.params, params)
+			r.msgHandler <- msg
+			started = false
+			params = []string{""}
+			datalen = 0
+			data = nil
+
+		default:
+			params = append(params, scanner.Text())
+
+		}
+
+		fmt.Println("RAW DUMP:", scanner.Text())
+	}
+	fmt.Println("Connection Closed")
+	os.Exit(1)
+}
+
+// handler(nodeMessager) listens on a message channel, creates and populates the appropriate
+// type, then hands off the message to the provided nodeMessager channel.
 func (r *FCPClient) handler(caller chan nodeMessager) {
 	for {
 		msg := <-r.msgHandler
 
+		// This is the list of all known FCP Server->Client messages.
+		// If I can figure out how to make reflection work, I might be able to generalize these
+		// since they all have the exact same pattern
 		switch msg.name {
 		case "NodeHello":
 			nh := &NodeHello{}
@@ -215,72 +285,13 @@ func (r *FCPClient) handler(caller chan nodeMessager) {
 	}
 }
 
-func (r *FCPClient) reciever() {
-	scanner := bufio.NewScanner(r.socket)
-	started := false
-	msg := message{}
-	params := []string{}
-	var datalen int64 = 0
-	var data []byte = nil
-
-	for {
-		if ok := scanner.Scan(); !ok {
-			break
-		}
-		if !started {
-			msg.name = scanner.Text()
-			started = true
-			if ok := scanner.Scan(); !ok {
-				break
-			}
-		}
-		param, val := SplitParam(scanner.Text())
-		switch param {
-		case "EndMessage":
-			params = append(params, scanner.Text())
-			msg.params = make([]string, len(params))
-			copy(msg.params, params)
-			r.msgHandler <- msg
-			started = false
-			params = []string{""}
-			datalen = 0
-			data = nil
-		case "DataLength":
-			params = append(params, scanner.Text())
-			datalen, _ = strconv.ParseInt(val, 10, 64)
-		case "Data":
-			params = append(params, scanner.Text())
-			data = make([]byte, datalen)
-			rb, err := io.ReadFull(r.socket, data)
-			if int64(rb) < datalen {
-				fmt.Println("Was expecting", datalen, "bytes, got", rb, "Bytes instead. ", err)
-			}
-			msg.data = make([]byte, datalen)
-			copy(msg.data, data)
-
-			msg.params = make([]string, len(params))
-			copy(msg.params, params)
-			r.msgHandler <- msg
-			started = false
-			params = []string{""}
-			datalen = 0
-			data = nil
-
-		default:
-			params = append(params, scanner.Text())
-
-		}
-
-		fmt.Println("RAW DUMP:", scanner.Text())
-	}
-	fmt.Println("Connection Closed")
-	os.Exit(1)
-}
-
+// Caller() returns the callback channel for this instance of fcp-go
 func (r *FCPClient) Caller() chan nodeMessager {
 	return r.caller
 }
 
+// SplitParam() takes a raw string from an FCP message and split it into a parameter and a value.
+// If there is no value, just return the parameter and an empty string.
 func SplitParam(v string) (param string, val string) {
 	val = ""
 	param = ""

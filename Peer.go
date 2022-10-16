@@ -140,3 +140,5 @@ func (r *Peer) parseMessage(rawMsg []string) {
 		}
 	}
 }
+
+func (r *Peer) GetName() string { return "Peer" }
