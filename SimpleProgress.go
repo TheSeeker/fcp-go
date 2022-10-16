@@ -69,14 +69,14 @@ func (r *SimpleProgress) parseMessage(rawMsg []string) {
 	}
 }
 
-func (r SimpleProgress) GetName() string                  { return "SimpleProgress" }
-func (r SimpleProgress) GetSucceeded() uint64             { return r.succeeded }
-func (r SimpleProgress) GetIdentifier() string            { return r.identifier }
-func (r SimpleProgress) GetRequired() uint64              { return r.required }
-func (r SimpleProgress) GetFinalizedTotal() bool          { return r.finalizedTotal }
-func (r SimpleProgress) GetMinSuccessFetchBlocks() uint64 { return r.minSuccessFetchBlocks }
-func (r SimpleProgress) GetFailed() uint64                { return r.failed }
-func (r SimpleProgress) GetTtotal() uint64                { return r.total }
-func (r SimpleProgress) GetLastProgress() time.Time       { return r.lastProgress }
-func (r SimpleProgress) GetFatallyFailed() uint64         { return r.fatallyFailed }
-func (r SimpleProgress) GetGlobal() bool                  { return r.global }
+func (r *SimpleProgress) GetName() string                  { return "SimpleProgress" }
+func (r *SimpleProgress) GetSucceeded() uint64             { return r.succeeded }
+func (r *SimpleProgress) GetIdentifier() string            { return r.identifier }
+func (r *SimpleProgress) GetRequired() uint64              { return r.required }
+func (r *SimpleProgress) GetFinalizedTotal() bool          { return r.finalizedTotal }
+func (r *SimpleProgress) GetMinSuccessFetchBlocks() uint64 { return r.minSuccessFetchBlocks }
+func (r *SimpleProgress) GetFailed() uint64                { return r.failed }
+func (r *SimpleProgress) GetTtotal() uint64                { return r.total }
+func (r *SimpleProgress) GetLastProgress() time.Time       { return r.lastProgress }
+func (r *SimpleProgress) GetFatallyFailed() uint64         { return r.fatallyFailed }
+func (r *SimpleProgress) GetGlobal() bool                  { return r.global }

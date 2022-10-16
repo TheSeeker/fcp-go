@@ -71,16 +71,16 @@ func (r *NodeHello) parseMessage(rawMsg []string) {
 }
 
 // Getters
-func (r NodeHello) GetName() string                 { return "NodeHello" }
-func (r NodeHello) GetNode() string                 { return r.node }
-func (r NodeHello) GetFCPVersion() string           { return r.fCPVersion }
-func (r NodeHello) GetVersion() []string            { return r.version }
-func (r NodeHello) GetBuild() string                { return r.build } // integer?
-func (r NodeHello) GetRevision() string             { return r.revision }
-func (r NodeHello) GetExtBuild() string             { return r.extBuild } // integer?
-func (r NodeHello) GetExtRevision() string          { return r.extRevision }
-func (r NodeHello) GetTestnet() bool                { return r.testnet }
-func (r NodeHello) GetNumcodecs() uint64            { return r.numcodecs }
-func (r NodeHello) GetCompressionCodecs() []string  { return r.compressionCodecs }
-func (r NodeHello) GetConnectionIdentifier() string { return r.connectionIdentifier }
-func (r NodeHello) GetNodeLanguage() string         { return r.nodeLanguage }
+func (r *NodeHello) GetName() string                 { return "NodeHello" }
+func (r *NodeHello) GetNode() string                 { return r.node }
+func (r *NodeHello) GetFCPVersion() string           { return r.fCPVersion }
+func (r *NodeHello) GetVersion() []string            { return r.version }
+func (r *NodeHello) GetBuild() string                { return r.build } // integer?
+func (r *NodeHello) GetRevision() string             { return r.revision }
+func (r *NodeHello) GetExtBuild() string             { return r.extBuild } // integer?
+func (r *NodeHello) GetExtRevision() string          { return r.extRevision }
+func (r *NodeHello) GetTestnet() bool                { return r.testnet }
+func (r *NodeHello) GetNumcodecs() uint64            { return r.numcodecs }
+func (r *NodeHello) GetCompressionCodecs() []string  { return r.compressionCodecs }
+func (r *NodeHello) GetConnectionIdentifier() string { return r.connectionIdentifier }
+func (r *NodeHello) GetNodeLanguage() string         { return r.nodeLanguage }

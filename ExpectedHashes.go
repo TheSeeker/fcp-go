@@ -49,12 +49,12 @@ func (r *ExpectedHashes) parseMessage(rawMsg []string) {
 	}
 }
 
-func (r ExpectedHashes) GetName() string          { return "ExpectedHashes" }
-func (r ExpectedHashes) GetIdentifier() string    { return r.identifier }
-func (r ExpectedHashes) GetGlobal() bool          { return r.global }
-func (r ExpectedHashes) GetHashes_SHA512() string { return r.hashes_SHA512 }
-func (r ExpectedHashes) GetHashes_SHA256() string { return r.hashes_SHA256 }
-func (r ExpectedHashes) GetHashes_SHAMD5() string { return r.hashes_MD5 }
-func (r ExpectedHashes) GetHashes_SHA1() string   { return r.hashes_SHA1 }
-func (r ExpectedHashes) GetHashes_TTH() string    { return r.hashes_TTH }
-func (r ExpectedHashes) GetHashes_ED2K() string   { return r.hashes_ED2K }
+func (r *ExpectedHashes) GetName() string          { return "ExpectedHashes" }
+func (r *ExpectedHashes) GetIdentifier() string    { return r.identifier }
+func (r *ExpectedHashes) GetGlobal() bool          { return r.global }
+func (r *ExpectedHashes) GetHashes_SHA512() string { return r.hashes_SHA512 }
+func (r *ExpectedHashes) GetHashes_SHA256() string { return r.hashes_SHA256 }
+func (r *ExpectedHashes) GetHashes_SHAMD5() string { return r.hashes_MD5 }
+func (r *ExpectedHashes) GetHashes_SHA1() string   { return r.hashes_SHA1 }
+func (r *ExpectedHashes) GetHashes_TTH() string    { return r.hashes_TTH }
+func (r *ExpectedHashes) GetHashes_ED2K() string   { return r.hashes_ED2K }
